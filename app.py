@@ -1,23 +1,19 @@
 from flask import Flask, render_template, request, jsonify
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
 import json
 import os
 from datetime import datetime
+from groq import Groq
 
 app = Flask(__name__)
 
-print("Waking up AI...")
-model_name = "microsoft/DialoGPT-small"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name)
-print("AI is awake and ready!")
+API_KEY = "Paste your Api Key here"
+client = Groq(api_key=API_KEY)
+# chat_session = None
+chat_history = [
+    {"role": "system", "content": "You are an empathetic mental health assistant here to listen, support, and help the user talk through their feelings. You will not judge, you will keep responses conversational and relatively brief, and you will never diagnose medical conditions."}
+]
 
-chat_history_ids = None
-
-persona_setup = "User: Hello. Who are you?\nBot: I am an empathetic mental health assistant here to listen, support, and help you talk through your feelings. I will not judge you.\nUser: "
 restricted_words = ["idiot", "stupid", "hate", "dumb", "ugly"]
-
 def contains_restricted_words(text):
     words = text.lower().split()
     for word in words:
@@ -58,39 +54,37 @@ def home():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    global chat_history_ids
-
+    global chat_history
     user_message = request.json.get("message")
     
     if contains_crisis_words(user_message):
         reply = "It sounds like you are going through a very difficult time. Please reach out for professional help immediately. You can call the KIRAN helpline at 1800-599-0019 or contact emergency services at 112."
         log_interaction(user_message, reply)
         return jsonify({"response": reply})
-
+    
     if contains_restricted_words(user_message):
         reply = "Let's keep our space respectful. I am here to help you, but I cannot process offensive language."
         log_interaction(user_message, reply)
         return jsonify({"response": reply})
-
-    if chat_history_ids is None:
-        hidden_prompt = persona_setup + user_message
-        new_user_input_ids = tokenizer.encode(hidden_prompt + tokenizer.eos_token, return_tensors='pt')
-        bot_input_ids = new_user_input_ids
-    else:
-        new_user_input_ids = tokenizer.encode(user_message + tokenizer.eos_token, return_tensors='pt')
-        bot_input_ids = torch.cat([chat_history_ids, new_user_input_ids], dim=-1)
     
-    chat_history_ids = model.generate(
-        bot_input_ids, 
-        max_length=1000, 
-        pad_token_id=tokenizer.eos_token_id,
-        no_repeat_ngram_size=3,
-        do_sample=True,
-        temperature=0.7,
-        top_k=50,
-        top_p=0.9
-    )
-    bot_reply = tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
+    try:
+        chat_history.append({"role": "user", "content": user_message})
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=chat_history,
+            temperature=0.7,
+            max_tokens=12000
+        )
+        
+        bot_reply = completion.choices[0].message.content
+        chat_history.append({"role": "assistant", "content": bot_reply})
+    except Exception as e:
+        bot_reply = f"Sorry, my connection to the cloud was interrupted. Please try again."
+        print(f"Error: {e}")
+        if chat_history[-1]["role"] == "user":
+            chat_history.pop()
+    
+    
     log_interaction(user_message, bot_reply)
     return jsonify({"response": bot_reply})
 

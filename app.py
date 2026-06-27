@@ -6,7 +6,7 @@ from groq import Groq
 
 app = Flask(__name__)
 
-API_KEY = "Paste your Api Key here"
+API_KEY = "Paste your key here"
 client = Groq(api_key=API_KEY)
 # chat_session = None
 chat_history = [
@@ -73,7 +73,7 @@ def chat():
             model="llama-3.3-70b-versatile",
             messages=chat_history,
             temperature=0.7,
-            max_tokens=12000
+            max_tokens=10000
         )
         
         bot_reply = completion.choices[0].message.content

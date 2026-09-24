@@ -2,3 +2,6 @@
 api_key.txt
 groq_api.txt
 Gemini key information.pdf
+.env
+__pycache__/
+*.db

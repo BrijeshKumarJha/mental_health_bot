@@ -1,33 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Support Bot</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
+    <div class="safety-header" style="background-color: #ff4d4d; padding: 10px; text-align: right; width: 100%; box-sizing: border-box;">
+        <button id="quick-exit-btn"
+            style="background-color: white; color: #ff4d4d; border: none; padding: 8px 16px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+            Leave Site Quickly (Esc x2)
+        </button>
+    </div>
     <div class="chat-container">
         <div class="chat-header">
             <h2>Mental Health Support</h2>
         </div>
-        
+
         <div class="chat-box" id="chat-box">
             <div class="message bot-message">Hello! I'm here to listen. How are you feeling today?
                 <span class="timestamp">Now</span>
             </div>
-            
+
             <div id="typing-indicator" class="typing-indicator hidden">
                 Bot is typing...
             </div>
         </div>
-        
+
         <div class="input-area">
             <input type="text" id="user-input" placeholder="Type your message here..." autocomplete="off">
             <button id="send-btn">Send</button>
         </div>
     </div>
-    
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <div class="medical-disclaimer"
+        style="background-color: #333; color: #ccc; font-size: 12px; text-align: center; padding: 15px; width: 100%; box-sizing: border-box;">
+        <strong>Disclaimer:</strong> This is an AI prototype intended for emotional support only. It is not a licensed
+        psychiatrist, therapist, or medical professional, and cannot diagnose or treat any medical conditions. <br>
+        If you are experiencing a mental health emergency or crisis, please call the Government of India Tele-MANAS
+        helpline immediately at <strong>14416</strong> or <strong>1800-891-4416</strong>, or contact emergency services
+        at <strong>112</strong>.
+    </div>
 </body>
+
 </html>

@@ -2,8 +2,9 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f4f7f6;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column; /* Forces children to stack vertically */
+    justify-content: space-between; /* Pushes header to top, footer to bottom, chat in middle */
+    align-items: center; /* Centers the chat container horizontally */
     height: 100vh;
     margin: 0;
 }

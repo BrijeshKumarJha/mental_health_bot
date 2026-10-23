@@ -52,3 +52,45 @@ userInput.addEventListener('keypress', function(e) {
     if(e.key === 'Enter') sendMessage();
 });
 
+document.addEventListener("DOMContentLoaded", function() {
+    const quickExitBtn = document.getElementById("quick-exit-btn");
+
+    function executeQuickExit() {
+        // 1. Tell the Flask backend to erase the server-side chat history
+        fetch("/clear_chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then(() => {
+            // 2. Clear any messages currently displayed on the screen
+            const chatBox = document.getElementById("chat-box"); // Ensure this matches your chat container ID
+            if(chatBox) chatBox.innerHTML = "";
+            
+            // 3. Instantly redirect to a safe, neutral website
+            window.location.replace("https://www.google.com/webhp");
+        }).catch(err => {
+            // Even if the server fails, prioritize user safety and redirect immediately
+            window.location.replace("https://www.google.com/webhp");
+        });
+    }
+
+    // Trigger exit on button click
+    if (quickExitBtn) {
+        quickExitBtn.addEventListener("click", executeQuickExit);
+    }
+
+    // Trigger exit if the user presses the 'Escape' key twice rapidly (Standard accessibility practice)
+    let escCount = 0;
+    let escTimer;
+    document.addEventListener("keydown", function(event) {
+        if (event.key === "Escape") {
+            escCount++;
+            if (escCount === 2) {
+                executeQuickExit();
+            }
+            clearTimeout(escTimer);
+            escTimer = setTimeout(() => { escCount = 0; }, 1000); // Reset count after 1 second
+        }
+    });
+});
